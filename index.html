@@ -1,0 +1,296 @@
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+		<title>Projects - Fog</title>
+		<script src="common.js"></script>
+		<script src="https://unpkg.com/@panzoom/panzoom@4.4.3/dist/panzoom.min.js"></script>
+		<style>
+body {
+	margin: 0;
+	display: flex;
+	flex-direction: row;
+	height: 100%;
+	background-color: #333;
+	color: #ddd;
+	--border-color: #555;
+	font-family: sans-serif;
+	--day-square-width: 30px;
+}
+
+* {
+	color: inherit;
+}
+
+#days {
+	flex: 1 0;
+	padding: 10px;
+}
+
+#left-panel {
+	background-color: #222;
+	border-right: 1px solid var(--border-color);
+	display: flex;
+	flex-direction: column;
+	flex: 0 0 200px;
+}
+
+button, a {
+	border: 0;
+	margin: 0;
+	padding: 10px;
+	font-size: 20px;
+	text-align: left;
+	background-color: transparent;
+	text-decoration: none;
+}
+
+button:hover, a:hover {
+	background-color: #ddd;
+	color: #333;
+}
+
+#right-panel {
+	background-color: #222;
+	border-left: 1px solid var(--border-color);
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	right: 0;
+	top: 0;
+	height: 100%;
+	min-width: 200px;
+}
+
+h2 {
+	margin: 0;
+	padding: 10px;
+	border-bottom: 1px solid var(--border-color);
+	text-align: center;
+}
+
+#panzoom {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+}
+
+.year {
+	background-color: #222;
+	display: flex;
+	flex-direction: row;
+	margin: 10px;
+}
+
+.year > :first-child {
+	text-align: center;
+	padding: 10px;
+	border-left: 1px solid var(--border-color);
+	border-bottom: 1px solid var(--border-color);
+	border-top: 1px solid var(--border-color);
+}
+
+.year > :last-child {
+	display: flex;
+	flex-direction: row;
+}
+
+.month {
+	background-color: #222;
+	display: flex;
+	flex-direction: column;
+	border-left: 3px solid var(--border-color);
+}
+
+.month > :first-child {
+	text-align: center;
+	padding: 10px;
+	border-left: 1px solid var(--border-color);
+	border-right: 1px solid var(--border-color);
+	border-top: 1px solid var(--border-color);
+}
+
+.month > :last-child {
+	display: flex;
+	flex-direction: row;
+	border-top: 1px solid var(--border-color);
+	border-left: 1px solid var(--border-color);
+}
+
+.hidden {
+	display: none !important;
+}
+
+.week {
+	display: flex;
+	flex-direction: column;
+}
+
+.day {
+	width: var(--day-square-width);
+	height: var(--day-square-width);
+	border-bottom: 1px solid var(--border-color);
+	border-right: 1px solid var(--border-color);
+	text-align: center;
+	line-height: var(--day-square-width);
+}
+
+.day.interactive {
+	cursor: help;
+}
+
+.highlighted {
+	background-color: #669;
+}
+
+.day.selected {
+	background-color: #383;
+}
+
+.day.off {
+	color: #555;
+}
+		</style>
+		<script>
+const SATURDAY = 5;
+const DAYS_IN_A_WEEK = 7;
+const TAB_TARGET = 'fog-journal';
+const monthCodes = [
+	'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+	'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+];
+
+function addMonth(parent, name, startDay, length, dayPrefix) {
+	let month = el({ className: 'month' });
+	let title = el({ tagName: 'span', innerText: name });
+	let days = el({});
+	let monthDay = 0;
+	for (let weekNr = 0; weekNr < 6; weekNr++){
+		let week = el({ className: 'week' });
+		for (let weekDay = 0; weekDay < DAYS_IN_A_WEEK; weekDay++, monthDay++) {
+			let day = el({ className: 'day' });
+			let dayNumber = monthDay - startDay + 1;
+			let inMonth = dayNumber > 0 && dayNumber <= length;
+			if (weekDay >= SATURDAY || !inMonth) {
+				day.classList.add('off');
+			}
+			if (inMonth) {
+				day.innerText = dayNumber.toString();
+				day.id = dayPrefix + day.innerText;
+				day.classList.add('interactive');
+			}
+			week.appendChild(day);
+		}
+		days.appendChild(week);
+	}
+	month.appendChild(title);
+	month.appendChild(days);
+	parent.appendChild(month);
+}
+
+function onDayLoaded(day) {
+	let dayElement = document.getElementsByClassName('selected')[0];
+	if (!dayElement) return;
+	let rightPanel = document.getElementById('right-panel');
+	for (let i in day) {
+		let project = document.getElementById(i);
+		for (let j = 0; j < day[i]; j++) {
+			let innerText = project.innerText + ' (' + (j + 1).toString() + ')';
+			let href = 'journal.html?' + project.id + '#' + dayElement.id + '-' + j.toString();
+			let props = { tagName: 'a', innerText, href, target: TAB_TARGET };
+			rightPanel.appendChild(el(props));
+		}
+	}
+}
+
+function showDay(day) {
+	toggle(day, 'selected', true);
+	let rightPanel = toggle('right-panel', 'hidden', false);
+	rightPanel.innerHTML = '';
+	rightPanel.appendChild(el({ tagName: 'h2', innerText: day }));
+	get('days/' + day + '.json', 'json', onDayLoaded);
+}
+
+function onYearClick(e) {
+	let target = e.target;
+	hide('selected');
+	toggle('right-panel', 'hidden', true);
+	if (target.id && target.classList.contains('day')) {
+		showDay(target.id);
+	}
+}
+
+function addYear(parent, year) {
+	let yearElement = el({ className: 'year' });
+	let str = year.toString();
+	let title = el({ tagName: 'span', innerText: str });
+	let months = el({});
+	for (let month = 0; month < 12; month++) {
+		let firstDay = new Date(year, month, 1);
+		let lastDay = new Date(year, month + 1, 0);
+		let name = firstDay.toLocaleString('default', { month: 'long' });
+		let length = lastDay.getDate();
+		let startDay = (firstDay.getDay() + 6) % 7;
+		let dayPrefix = str + '-' + monthCodes[month] + '-';
+		addMonth(months, name, startDay, length, dayPrefix);
+	}
+	yearElement.appendChild(title);
+	yearElement.appendChild(months);
+	parent.appendChild(yearElement);
+}
+
+function onConfigLoaded(config) {
+	console.log(config);
+	let zone = document.getElementById('panzoom');
+	for (let i in config.years) addYear(zone, config.years[i]);
+	let projects = config.projects;
+	let leftPanel = document.getElementById('left-panel');
+	leftPanel.innerHTML = '';
+	leftPanel.appendChild(el({ tagName: 'h2', innerText: 'Projects' }));
+	for (let i in projects) {
+		let project = projects[i];
+		let props = { tagName: 'button', innerText: project[0], id: project[1] };
+		leftPanel.appendChild(el(props));
+	}
+}
+
+function onProjectDaysLoaded(days) {
+	if (!days) return;
+	for (let i in days) {
+		let data = days[i].split('/');
+		let dayElement = document.getElementById(data[0]);
+		dayElement.classList.add('highlighted');
+	}
+}
+
+function onProjectClick(e) {
+	hide('highlighted');
+	if (e.target.tagName.toLowerCase() == 'button') {
+		toggle(e.target.id, 'highlighted', true);
+		get(e.target.id + '/days.json', 'json', onProjectDaysLoaded);
+	}
+}
+
+function setup() {
+	const days = document.getElementById('days');
+	const zone = document.getElementById('panzoom');
+	const leftPanel = document.getElementById('left-panel');
+	const panzoom = Panzoom(zone, { maxScale: 5 });
+	days.addEventListener('wheel', panzoom.zoomWithWheel);
+	days.addEventListener('click', onYearClick);
+	leftPanel.addEventListener('click', onProjectClick);
+	get('config.json', 'json', onConfigLoaded);
+}
+		</script>
+	</head>
+	<body onload="setup();">
+		<div id="left-panel">
+			<h2>Loading projects...</h2>
+		</div>
+		<div id="days">
+			<div id="panzoom"></div>
+		</div>
+		<div id="right-panel" class="hidden"></div>
+	</body>
+</html>
