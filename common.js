@@ -23,7 +23,7 @@ function toggle(id, className, state) {
 }
 
 function hide(className) {
-	let elements = document.getElementsByClassName(className);
+	let elements = Array.from(document.getElementsByClassName(className));
 	for (let i = 0; i < elements.length; i++) {
 		elements[i].classList.remove(className);
 	}

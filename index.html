@@ -13,7 +13,7 @@ body {
 	height: 100%;
 	background-color: #333;
 	color: #ddd;
-	--border-color: #555;
+	--border-color: #999;
 	font-family: sans-serif;
 	--day-square-width: 30px;
 }
@@ -28,7 +28,6 @@ body {
 }
 
 #left-panel {
-	background-color: #222;
 	border-right: 1px solid var(--border-color);
 	display: flex;
 	flex-direction: column;
@@ -51,15 +50,16 @@ button:hover, a:hover {
 }
 
 #right-panel {
-	background-color: #222;
 	border-left: 1px solid var(--border-color);
 	display: flex;
 	flex-direction: column;
+	background-color: #333;
 	position: absolute;
 	right: 0;
 	top: 0;
 	height: 100%;
 	min-width: 200px;
+	max-width: 200px;
 }
 
 h2 {
@@ -77,7 +77,6 @@ h2 {
 }
 
 .year {
-	background-color: #222;
 	display: flex;
 	flex-direction: row;
 	margin: 10px;
@@ -97,7 +96,6 @@ h2 {
 }
 
 .month {
-	background-color: #222;
 	display: flex;
 	flex-direction: column;
 	border-left: 3px solid var(--border-color);
@@ -241,7 +239,6 @@ function addYear(parent, year) {
 }
 
 function onConfigLoaded(config) {
-	console.log(config);
 	let zone = document.getElementById('panzoom');
 	for (let i in config.years) addYear(zone, config.years[i]);
 	let projects = config.projects;

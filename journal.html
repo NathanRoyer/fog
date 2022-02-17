@@ -10,8 +10,8 @@ body {
 	background-color: #333;
 	color: #ddd;
 	font-family: sans-serif;
-	width: 50%;
-	margin: 10px 25%;
+	width: 70%;
+	margin: 10px 15%;
 }
 
 img {
@@ -81,3 +81,75 @@ function setup() {
 	</head>
 	<body onload="setup();">Loading Project Journal...</body>
 </html>
+
+<!--
+
+
+
+const renderer = {
+	code(innerText, infostring, escaped) {
+		return el({ tagName: 'code', innerText }).outerHTML;
+	},
+	blockquote(innerText) {
+		return el({ tagName: 'span', className: 'quote', innerText }).outerHTML;
+	},
+	html(html) {
+		return html;
+	},
+	heading(innerText, level) {
+		console.log(innerText);
+		let tagName = 'h' + level.toString();
+		return el({ tagName, innerText }).outerHTML;
+	},
+	hr(hr) {
+		return '<hr>';
+	},
+	list(body, ordered, start) {
+		console.log(body);
+		return '';
+	},
+	listitem(innerText, task, checked) {
+		return el({ tagName: 'span', innerText }).outerHTML;
+	},
+	checkbox(checked) {
+		return el({ tagName: 'input', type: 'checkbox', checked }).outerHTML;
+	},
+	paragraph(innerText) {
+		return el({ tagName: 'p', innerText }).outerHTML;
+	},
+	table() {
+		return '';
+	},
+	tablerow() {
+		return '';
+	},
+	tablecell() {
+		return '';
+	},
+	strong(innerText) {
+		return el({ tagName: 's', innerText }).outerHTML;
+	},
+	em() {
+		return '';
+	},
+	codespan() {
+		return '';
+	},
+	br() {
+		return '<br>';
+	},
+	del() {
+		return '';
+	},
+	link(href, title, innerText) {
+		return el({ href, title, innerText }).outerHTML;
+	},
+	image(href, title, alt) {
+		console.log(href);
+		let src = project + href;
+		return el({ src, title, alt }).outerHTML;
+	},
+	text(innerText) {
+		return el({ innerText }).outerHTML;
+	}
+};
